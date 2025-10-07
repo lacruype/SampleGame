@@ -102,3 +102,6 @@
 #begin images/tilemap-definition.xml
 /copy:images/tilemap-definition.xml
 
+#begin levels/level-01.json
+/copy:levels/level-01.json
+

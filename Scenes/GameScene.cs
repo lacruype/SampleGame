@@ -150,16 +150,18 @@ public class GameScene : Scene
     {
         TextureAtlas atlas = TextureAtlas.FromFile(Core.Content, "images/atlas-definition.xml");
 
-        // Load the tilemap definition.
-        _level_01 = new Level();
+        // // Load the tilemap definition.
+        // _level_01 = new Level();
 
-        Tilemap _tilemap = Tilemap.FromFile(Core.Content, "images/tilemap-definition.xml");
-        _tilemap.Scale = new Vector2(5.0f, 5.0f);
-        _level_01.AddLayer(_tilemap);
+        // Tilemap _tilemap = Tilemap.FromFile(Core.Content, "images/tilemap-definition.xml");
+        // _tilemap.Scale = new Vector2(5.0f, 5.0f);
+        // _level_01.AddLayer(_tilemap);
 
-        _tilemap = Tilemap.FromFile(Core.Content, "images/level-01-MainLayer.xml");
-        _tilemap.Scale = new Vector2(5.0f, 5.0f);
-        _level_01.AddLayer(_tilemap);
+        // _tilemap = Tilemap.FromFile(Core.Content, "images/level-01-MainLayer.xml");
+        // _tilemap.Scale = new Vector2(5.0f, 5.0f);
+        // _level_01.AddLayer(_tilemap);
+
+        _level_01 = new Level(Core.Content, "levels/level-01.json", "Background", "MainLayer");
 
         // Create the animated sprite for the player from the atlas.
         AnimatedSprite playerAnimation = atlas.CreateAnimatedSprite("player-animation-idle");
