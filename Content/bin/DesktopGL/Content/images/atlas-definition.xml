@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas>
+    <Texture>images/atlas</Texture>
+    <Regions>
+        <Region name="player-01" x="144" y="0" width="16" height="16" />
+        <Region name="player-02" x="160" y="0" width="16" height="16" />
+        <Region name="player-03" x="176" y="0" width="16" height="16" />
+        <Region name="fly-01" x="144" y="16" width="16" height="16" />
+        <Region name="fly-02" x="160" y="16" width="16" height="16" />
+        <Region name="fly-03" x="176" y="16" width="16" height="16" />
+        <Region name="bullet-01" x="144" y="32" width="16" height="16" />
+        <Region name="bullet-02" x="160" y="32" width="16" height="16" />
+        <Region name="bullet-03" x="176" y="32" width="16" height="16" />
+        <Region name="unfocused-button" x="259" y="80" width="65" height="14" />
+        <Region name="focused-button-1" x="259" y="94" width="65" height="14" />
+        <Region name="focused-button-2" x="259" y="109" width="65" height="14" />
+        <Region name="panel-background" x="324" y="97" width="15" height="15" />
+        <Region name="slider-off-background" x="341" y="96" width="11" height="10" />
+        <Region name="slider-middle-background" x="345" y="81" width="3" height="3" />
+        <Region name="slider-max-background" x="354" y="96" width="11" height="10" />
+    </Regions>
+    <Animations>
+        <Animation name="player-animation-idle" delay="200">
+            <Frame region="player-01" />
+            <Frame region="player-02" />
+            <Frame region="player-03" />
+            <Frame region="player-02" />
+        </Animation>
+        <Animation name="fly-animation-idle" delay="200">
+            <Frame region="fly-01" />
+            <Frame region="fly-02" />
+            <Frame region="fly-03" />
+            <Frame region="fly-02" />
+        </Animation>
+        <Animation name="bullet-animation-idle" delay="200">
+            <Frame region="bullet-01" />
+            <Frame region="bullet-02" />
+            <Frame region="bullet-03" />
+            <Frame region="bullet-02" />
+        </Animation>
+        <Animation name="focused-button-animation" delay="300">
+            <Frame region="focused-button-1" />
+            <Frame region="focused-button-2" />
+        </Animation>
+    </Animations>
+    <Texture>images/atlas-exterior</Texture>
+    <Regions>
+        <Region name="ground-01" x="48" y="128" width="16" height="16" />
+        <Region name="ground-02" x="64" y="128" width="16" height="16" />
+    </Regions>
+</TextureAtlas>

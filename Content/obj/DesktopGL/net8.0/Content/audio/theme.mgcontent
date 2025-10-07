@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/audio/theme.ogg</SourceFile>
+  <SourceTime>2025-09-18T17:27:48.4070647+02:00</SourceTime>
+  <DestFile>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/bin/DesktopGL/Content/audio/theme.xnb</DestFile>
+  <DestTime>2025-09-29T14:28:14.9519466+02:00</DestTime>
+  <Importer>OggImporter</Importer>
+  <ImporterTime>2025-06-02T12:31:02+02:00</ImporterTime>
+  <Processor>SongProcessor</Processor>
+  <ProcessorTime>2025-06-02T12:31:02+02:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput>
+    <string>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/bin/DesktopGL/Content/audio/theme.ogg</string>
+  </BuildOutput>
+</PipelineBuildEvent>

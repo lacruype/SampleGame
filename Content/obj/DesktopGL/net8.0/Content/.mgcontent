@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/audio/bounce.wav</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/audio/collect.wav</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/audio/theme.ogg</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/audio/ui.wav</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/fonts/04B_30_5x.spritefont</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/fonts/04B_30.spritefont</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/images/atlas.png</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/images/background-pattern.png</File>
+    <File>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/images/logo.png</File>
+  </SourceFiles>
+  <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+  </DestFiles>
+</SourceFileCollection>
