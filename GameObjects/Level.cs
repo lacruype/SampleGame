@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary.Graphics;
+using SampleGame.Scenes;
 
 namespace SampleGame.GameObjects
 {
@@ -82,9 +83,9 @@ namespace SampleGame.GameObjects
                 for (int y = 0; y < height; y++)
                 {
                     if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
-                        _levelGrid[x, y] = 1;
+                        _levelGrid[x, y] |= GameScene.CellType.WALL;
                     else
-                        _levelGrid[x, y] = 0;
+                        _levelGrid[x, y] |= GameScene.CellType.WALKABLE;
                 }
             }
         }

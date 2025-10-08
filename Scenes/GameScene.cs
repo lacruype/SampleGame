@@ -23,16 +23,30 @@ public class GameScene : Scene
         GameOver
     }
 
+    public static class CellType
+    {
+        public const int WALKABLE = 1 << 0; // 1
+        public const int WALL     = 1 << 1; // 2
+        public const int PLAYER   = 1 << 2; // 4
+        public const int ZOMBIE   = 1 << 3; // 8
+        public const int BULLET   = 1 << 4; // 16
+        public const int EXPLOSION = 1 << 5; // 32 (new flag)
+    }
+
     // Reference to the player.
     private ObjectPlayer _player;
 
-    // Reference to the fly.
-    private List<ObjectNPC1> _flies = new List<ObjectNPC1>();
-    private AnimatedSprite flyAnimation;
+    // Reference to the zombie.
+    private List<Zombie> _zombies = new List<Zombie>();
+    // We used to store shared AnimatedSprite instances here, but that caused
+    // flipping/effects on one NPC to affect all others. Instead keep a
+    // reference to the atlas and create a fresh AnimatedSprite per instance.
 
     // Reference to the bullets.
-    private List<ObjectNPC2> _bullets = new List<ObjectNPC2>();
-    private AnimatedSprite bulletAnimation;
+    private List<Bullet> _bullets = new List<Bullet>();
+
+    // The texture atlas to create per-entity AnimatedSprite instances from.
+    private TextureAtlas _atlas;
 
     // Defines the tilemap to draw.
     private Level _level_01;
@@ -49,7 +63,7 @@ public class GameScene : Scene
     /// <summary>
     /// Countdown timer for the next ennemy move.
     /// </summary>
-    private int _countdownTillNextMove;
+    private int _countdownTillNextEnemyMove;
 
     /// <summary>
     /// Countdown timer for the next enemy spawn.
@@ -88,40 +102,39 @@ public class GameScene : Scene
 
     private void InitializeNewGame()
     {
-        _flies.Clear();
+        _zombies.Clear();
         _bullets.Clear();
     
         // Define the level layout based on the tilemap
         _level_01.InitializeGrid(_level_01.Layers[0].Columns, _level_01.Layers[0].Rows);
 
-        _flies.Add(new ObjectNPC1(flyAnimation));
-        _bullets.Add(new ObjectNPC2(bulletAnimation));
+        OnTimeToAddNewNPC();
 
         Point playerPos = new Point(_level_01.Layers[0].Columns / 2, _level_01.Layers[0].Rows / 2);
 
-        // Position of player is defined by a 1 in the level layout
-        _level_01._levelGrid[playerPos.X, playerPos.Y] = 1;
+        _player.Initialize(playerPos, _level_01._levelGrid);
 
-        _player.Initialize(playerPos);
-
-        // Position of flies is defined by a 1 in the level layout
-        foreach (var fly in _flies)
-            fly.Initialize(FindStartingPositionForNPCs(_level_01._levelGrid), _level_01._levelGrid);
+        foreach (var zombie in _zombies)
+        {
+            Point zombiePos = FindStartingPositionForZombies(_level_01._levelGrid);
+            if (zombiePos != new Point(-1, -1))
+                zombie.Initialize(zombiePos, _level_01._levelGrid);
+        }
 
         foreach (var bullet in _bullets)
-            bullet.Initialize(FindStartingPositionForNPCs(_level_01._levelGrid));
+        {
+            Point bulletPos = FindStartingPositionForBullets(_level_01._levelGrid);
+            if (bulletPos != new Point(-1, -1))
+                bullet.Initialize(bulletPos, _level_01._levelGrid);
+        }
 
-        // Subscribe every fly to the collision event
-        // foreach (var fly in _flies)
-        // fly.CollisionWithPlayer += OnPlayerFlyCollision;
-
-        _countdownTillNextMove = Game1.MoveDelay;
+        _countdownTillNextEnemyMove = Game1.MoveDelay;
         _countdownTillNextSpawn = Game1.SpawnDelay;
 
         _state = GameState.Playing;
     }
 
-    private Point FindStartingPositionForNPCs(int[,] levelGrid)
+    private Point FindStartingPositionForZombies(int[,] levelGrid)
     {
         Random random = new Random();
         int width = levelGrid.GetLength(0);
@@ -133,13 +146,45 @@ public class GameScene : Scene
         {
             for (int y = 1; y < height - 1; y++)
             {
-                if (levelGrid[x, y] == 0) // 0 = walkable
+                if (levelGrid[x, y] == CellType.WALKABLE)
                     walkableTiles.Add(new Point(x, y));
             }
         }
 
         if (walkableTiles.Count == 0)
-            throw new InvalidOperationException("No walkable tiles found in the level grid.");
+        {
+            Console.WriteLine("No walkable tiles found to add Zombie");
+            // Returns a null Point
+            return new Point(-1, -1);
+        }
+
+        // Pick a random one
+        int index = random.Next(walkableTiles.Count);
+        return walkableTiles[index];
+    }
+
+    private Point FindStartingPositionForBullets(int[,] levelGrid)
+    {
+        Random random = new Random();
+        int width = levelGrid.GetLength(0);
+        int height = levelGrid.GetLength(1);
+
+        // Collect all walkable tiles
+        List<Point> walkableTiles = new List<Point>();
+        for (int x = 1; x < width - 1; x++)
+        {
+            for (int y = 1; y < height - 1; y++)
+            {
+                if (levelGrid[x, y] == CellType.WALKABLE)
+                    walkableTiles.Add(new Point(x, y));
+            }
+        }
+
+        if (walkableTiles.Count == 0)
+        {
+            Console.WriteLine("No walkable tiles found to add Bullet");
+            return new Point(-1, -1);
+        }
 
         // Pick a random one
         int index = random.Next(walkableTiles.Count);
@@ -148,32 +193,17 @@ public class GameScene : Scene
 
     public override void LoadContent()
     {
-        TextureAtlas atlas = TextureAtlas.FromFile(Core.Content, "images/atlas-definition.xml");
-
-        // // Load the tilemap definition.
-        // _level_01 = new Level();
-
-        // Tilemap _tilemap = Tilemap.FromFile(Core.Content, "images/tilemap-definition.xml");
-        // _tilemap.Scale = new Vector2(5.0f, 5.0f);
-        // _level_01.AddLayer(_tilemap);
-
-        // _tilemap = Tilemap.FromFile(Core.Content, "images/level-01-MainLayer.xml");
-        // _tilemap.Scale = new Vector2(5.0f, 5.0f);
-        // _level_01.AddLayer(_tilemap);
+        _atlas = TextureAtlas.FromFile(Core.Content, "images/atlas-definition.xml");
 
         _level_01 = new Level(Core.Content, "levels/level-01.json", "Background", "MainLayer");
 
         // Create the animated sprite for the player from the atlas.
-        AnimatedSprite playerAnimation = atlas.CreateAnimatedSprite("player-animation-idle");
+        AnimatedSprite playerAnimation = _atlas.CreateAnimatedSprite("player-animation-idle");
         playerAnimation.Scale = new Vector2(5.0f, 5.0f);
 
-        // Create the animated sprite for the fly from the atlas.
-        flyAnimation = atlas.CreateAnimatedSprite("fly-animation-idle");
-        flyAnimation.Scale = new Vector2(5.0f, 5.0f);
-
-        // Create the animated sprite for the bullet from the atlas.
-        bulletAnimation = atlas.CreateAnimatedSprite("bullet-animation-idle");
-        bulletAnimation.Scale = new Vector2(5.0f, 5.0f);
+        // Note: We intentionally don't create shared zombie/bullet sprites here.
+        // Each NPC will get its own AnimatedSprite instance when spawned so
+        // flipping/effects are independent per entity.
 
         // Create the player.
         _player = new ObjectPlayer(playerAnimation);
@@ -182,35 +212,52 @@ public class GameScene : Scene
     private void UpdateMovementPlayer()
     {
         Point _potentialPosition = _player._gridPosition;
+        // Need to check if the player really moved and not just pressed the button and hit a wall
         _hasMoved = false;
 
         /* Player Movement */
         if (GameController.MoveLeft())
+        {
+            _player._sprite.Effects = SpriteEffects.FlipHorizontally;
             _potentialPosition -= new Point(1, 0);
+        }
         else if (GameController.MoveRight())
+        {
+            _player._sprite.Effects = SpriteEffects.None;
             _potentialPosition += new Point(1, 0);
+        }
         else if (GameController.MoveUp())
             _potentialPosition -= new Point(0, 1);
         else if (GameController.MoveDown())
             _potentialPosition += new Point(0, 1);
 
-        if (_potentialPosition != _player._gridPosition &&
-            _level_01._levelGrid[_potentialPosition.X, _potentialPosition.Y] != 1)
+        if (_potentialPosition == _player._gridPosition || 
+        (_level_01._levelGrid[_potentialPosition.X, _potentialPosition.Y] & CellType.WALL) != 0)
+            return;
+
+        _player.MoveTo(_potentialPosition, _level_01._levelGrid);
+        foreach (var zombie in _zombies)
+            if (zombie._gridPosition == _player._gridPosition)
+                OnPlayerZombieCollision();
+        _hasMoved = true;
+        _countdownTillNextSpawn--;
+        if ((_level_01._levelGrid[_player._gridPosition.X, _player._gridPosition.Y] & CellType.BULLET) != 0)
         {
-            _player.MoveTo(_potentialPosition, _level_01._levelGrid);
-            _hasMoved = true;
-            _countdownTillNextSpawn--;
             // Iterate backwards to safely remove items from the list while iterating
             for (int i = _bullets.Count - 1; i >= 0; i--)
             {
                 var bullet = _bullets[i];
                 if (bullet._gridPosition == _player._gridPosition)
                 {
-                    if (_flies.Count > 0)
+                    if (_zombies.Count > 0)
                     {
+                        // The bullet has been used so we delete the flag BULLET from its tile
+                        _level_01._levelGrid[bullet._gridPosition.X, bullet._gridPosition.Y] &= ~CellType.BULLET;
                         _bullets.RemoveAt(i);
-                        _level_01._levelGrid[_flies[0]._gridPosition.X, _flies[0]._gridPosition.Y] = 0;
-                        _flies.RemoveAt(0);
+                        // The zombie has been hit so we delete the flag ZOMBIE from its tile
+                        _level_01._levelGrid[_zombies[0]._gridPosition.X,
+                                            _zombies[0]._gridPosition.Y] &= ~CellType.ZOMBIE;
+                        _zombies.RemoveAt(0);
                     }
                 }
             }
@@ -227,19 +274,19 @@ public class GameScene : Scene
     {
         /* Pathfinding for flies */
         Pathfinder pathfinder = new(_level_01._levelGrid);
-        foreach (var fly in _flies)
+        foreach (var zombie in _zombies)
         {
-            Point nextPosition = pathfinder.GetNextPosition(fly._gridPosition, _player._gridPosition);
-            fly.MoveTo(nextPosition, _level_01._levelGrid);
-            if (fly._gridPosition == _player._gridPosition)
+            Point nextPosition = pathfinder.GetNextPosition(zombie._gridPosition, _player._gridPosition);
+            zombie.MoveTo(nextPosition, _level_01._levelGrid);
+            if (zombie._gridPosition == _player._gridPosition)
             {
                 // Handle collision with player
-                OnPlayerFlyCollision();
+                OnPlayerZombieCollision();
             }
         }
     }
 
-    private void OnPlayerFlyCollision()
+    private void OnPlayerZombieCollision()
     {
         GameOver();
     }
@@ -273,16 +320,16 @@ public class GameScene : Scene
 
         UpdateMovementPlayer();
         if (_hasMoved)
-            _countdownTillNextMove--;
-        if (_countdownTillNextMove <= 0)
+            _countdownTillNextEnemyMove--;
+        if (_countdownTillNextEnemyMove <= 0)
         {
-            _countdownTillNextMove = Game1.MoveDelay;
+            _countdownTillNextEnemyMove = Game1.MoveDelay;
             UpdateMovementEnemies(gameTime);
         }
 
         _player.Update(gameTime);
-        foreach (var fly in _flies)
-            fly.Update(gameTime);
+        foreach (var zombie in _zombies)
+            zombie.Update(gameTime);
         foreach (var bullet in _bullets)
             bullet.Update(gameTime);
 
@@ -310,23 +357,31 @@ public class GameScene : Scene
         }
     }
 
-    private void OnPlayerFlyCollision(object sender, EventArgs args)
+    private void OnPlayerZombieCollision(object sender, EventArgs args)
     {
         GameOver();
     }
 
     private void OnTimeToAddNewNPC()
     {
-        // Spawn a new NPC
-        var newNPC = new ObjectNPC1(flyAnimation);
-        newNPC.Initialize(FindStartingPositionForNPCs(_level_01._levelGrid), _level_01._levelGrid);
+        // Spawn a new NPC (zombie) with its own AnimatedSprite instance
+        var zombieSprite = _atlas.CreateAnimatedSprite("zombie-animation-idle");
+        zombieSprite.Scale = new Vector2(5.0f, 5.0f);
+        var newZombie = new Zombie(zombieSprite);
+        Point zombieStartPos = FindStartingPositionForZombies(_level_01._levelGrid);
+        if (zombieStartPos != new Point(-1, -1))
+            newZombie.Initialize(zombieStartPos, _level_01._levelGrid);
 
-        // Spawn a new NPC2
-        var newNPC2 = new ObjectNPC2(bulletAnimation);
-        newNPC2.Initialize(FindStartingPositionForNPCs(_level_01._levelGrid));
+        // Spawn a new NPC2 (bullet) with its own AnimatedSprite instance
+        var bulletSprite = _atlas.CreateAnimatedSprite("bullet-animation-idle");
+        bulletSprite.Scale = new Vector2(5.0f, 5.0f);
+        var newBullet = new Bullet(bulletSprite);
+        Point bulletStartPos = FindStartingPositionForZombies(_level_01._levelGrid);
+        if (bulletStartPos != new Point(-1, -1))
+            newBullet.Initialize(bulletStartPos, _level_01._levelGrid);
 
-        _flies.Add(newNPC);
-        _bullets.Add(newNPC2);
+        _zombies.Add(newZombie);
+        _bullets.Add(newBullet);
     }
 
     private void GameOver()
@@ -350,8 +405,8 @@ public class GameScene : Scene
 
         _player.Draw();
 
-        foreach (var fly in _flies)
-            fly.Draw();
+        foreach (var zombie in _zombies)
+            zombie.Draw();
 
         foreach (var bullet in _bullets)
             bullet.Draw();

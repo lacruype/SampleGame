@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
+using SampleGame.Scenes;
 
 namespace SampleGame.GameObjects;
 
@@ -43,9 +44,10 @@ public class ObjectPlayer
     /// Initializes the player, can be used to reset it back to an initial state.
     /// </summary>
     /// <param name="startingPosition">The position the player should start at.</param>
-    public void Initialize(Point startingPosition)
+    public void Initialize(Point startingPosition, int[,] levelGrid)
     {
         _gridPosition = startingPosition;
+        MoveTo(_gridPosition, levelGrid);
     }
 
     /// <summary>
@@ -71,8 +73,8 @@ public class ObjectPlayer
 
     public void MoveTo(Point newPosition, int[,] _levelGrid)
     {
-        _levelGrid[_gridPosition.X, _gridPosition.Y] = 0;
+        _levelGrid[_gridPosition.X, _gridPosition.Y] &= ~GameScene.CellType.PLAYER;
         _gridPosition = newPosition;
-        _levelGrid[_gridPosition.X, _gridPosition.Y] = 2;
+        _levelGrid[_gridPosition.X, _gridPosition.Y] |= GameScene.CellType.PLAYER;
     }
 }

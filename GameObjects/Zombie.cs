@@ -1,11 +1,13 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
+using SampleGame.Scenes;
 
 namespace SampleGame.GameObjects;
 
-public class ObjectNPC1
+public class Zombie
 {
     /* ================================== ATTRIBUTES ================================== */
     /// <summary>
@@ -14,12 +16,12 @@ public class ObjectNPC1
     private AnimatedSprite _sprite;
 
     /// <summary>
-    /// The tile position of the ObjectNPC1.
+    /// The tile position of the Zombie.
     /// </summary>
     public Point _gridPosition { get; set; }   // e.g., (5, 2)
 
     /// <summary>
-    /// The position of the ObjectNPC1 on the screen
+    /// The position of the Zombie on the screen
     /// </summary>
     public Vector2 _screenPosition => new Vector2(
         _gridPosition.X * Game1.TileSize,
@@ -33,7 +35,7 @@ public class ObjectNPC1
     /// Creates a new ObjectNPC using the specified animated sprite and sound effect.
     /// </summary>
     /// <param name="sprite">The AnimatedSprite ot use when drawing the bat.</param>
-    public ObjectNPC1(AnimatedSprite sprite)
+    public Zombie(AnimatedSprite sprite)
     {
         _sprite = sprite;
     }
@@ -50,9 +52,13 @@ public class ObjectNPC1
 
     public void MoveTo(Point newPosition, int[,] _levelGrid)
     {
-        _levelGrid[_gridPosition.X, _gridPosition.Y] = 0;
+        _levelGrid[_gridPosition.X, _gridPosition.Y] &= ~GameScene.CellType.ZOMBIE;
+        if (_gridPosition.X < newPosition.X)
+            _sprite.Effects = SpriteEffects.FlipHorizontally;
+        else if (_gridPosition.X > newPosition.X)
+            _sprite.Effects = SpriteEffects.None; // Facing left
         _gridPosition = newPosition;
-        _levelGrid[_gridPosition.X, _gridPosition.Y] = 1;
+        _levelGrid[_gridPosition.X, _gridPosition.Y] |= GameScene.CellType.ZOMBIE;
     }
 
     /// <summary>

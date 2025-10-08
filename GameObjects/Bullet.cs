@@ -2,10 +2,11 @@ using System;
 using Microsoft.Xna.Framework;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
+using SampleGame.Scenes;
 
 namespace SampleGame.GameObjects;
 
-public class ObjectNPC2
+public class Bullet
 {
     /* ================================== ATTRIBUTES ================================== */
     /// <summary>
@@ -14,12 +15,12 @@ public class ObjectNPC2
     private AnimatedSprite _sprite;
  
     /// <summary>
-    /// The tile position of the ObjectNPC2.
+    /// The tile position of the Bullet.
     /// </summary>
     public Point _gridPosition { get; set; }   // e.g., (5, 2)
 
     /// <summary>
-    /// The position of the ObjectNPC2 on the screen
+    /// The position of the Bullet on the screen
     /// </summary>
     public Vector2 _screenPosition => new Vector2(
         _gridPosition.X * Game1.TileSize,
@@ -33,7 +34,7 @@ public class ObjectNPC2
     /// Creates a new ObjectNPC using the specified animated sprite and sound effect.
     /// </summary>
     /// <param name="sprite">The AnimatedSprite ot use when drawing the bat.</param>
-    public ObjectNPC2(AnimatedSprite sprite)
+    public Bullet(AnimatedSprite sprite)
     {
         _sprite = sprite;
     }
@@ -43,9 +44,10 @@ public class ObjectNPC2
     /// Initializes the ObjectNPC with the starting position.
     /// </summary>
     /// <param name="startingPosition"></param>
-    public void Initialize(Point startingPosition)
+    public void Initialize(Point startingPosition, int[,] levelGrid)
     {
         _gridPosition = startingPosition;
+        levelGrid[_gridPosition.X, _gridPosition.Y] |= GameScene.CellType.BULLET;
     }
 
     /// <summary>

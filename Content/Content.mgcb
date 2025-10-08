@@ -57,9 +57,6 @@
 #begin images/atlas-definition.xml
 /copy:images/atlas-definition.xml
 
-#begin images/atlas-exterior.png
-/copy:images/atlas-exterior.png
-
 #begin images/atlas.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -84,9 +81,6 @@
 /processorParam:TextureFormat=Color
 /build:images/background-pattern.png
 
-#begin images/level-01-MainLayer.xml
-/copy:images/level-01-MainLayer.xml
-
 #begin images/logo.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -98,9 +92,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:images/logo.png
-
-#begin images/tilemap-definition.xml
-/copy:images/tilemap-definition.xml
 
 #begin levels/level-01.json
 /copy:levels/level-01.json

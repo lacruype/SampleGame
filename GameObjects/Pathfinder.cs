@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework; // for Vector2
+using Microsoft.Xna.Framework;
+using SampleGame.Scenes; // for Vector2
 
 namespace SampleGame.GameObjects
 {
@@ -73,7 +74,8 @@ namespace SampleGame.GameObjects
                         continue;
 
                     int cell = grid[nx, ny];
-                    if (cell == 1 || cell == 3) // wall or other fly
+                    if ((cell & GameScene.CellType.WALL) != 0 ||
+                        (cell & GameScene.CellType.ZOMBIE) != 0) // wall or other zombie
                         continue;
 
                     if (closed.Contains((nx, ny)))
