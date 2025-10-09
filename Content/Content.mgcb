@@ -37,22 +37,12 @@
 /processorParam:Quality=Best
 /build:audio/ui.wav
 
-#begin fonts/04B_30_5x.spritefont
+#begin fonts/MP16REG.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:fonts/04B_30_5x.spritefont
-
-#begin fonts/04b_30.fnt
-/copy:fonts/04b_30.fnt
-
-#begin fonts/04B_30.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Compressed
-/build:fonts/04B_30.spritefont
+/build:fonts/MP16REG.spritefont
 
 #begin images/atlas-definition.xml
 /copy:images/atlas-definition.xml

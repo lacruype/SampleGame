@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SourceFile>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/fonts/04B_30_5x.spritefont</SourceFile>
-  <SourceTime>2025-09-19T11:07:42.4641819+02:00</SourceTime>
-  <DestFile>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/bin/DesktopGL/Content/fonts/04B_30_5x.xnb</DestFile>
-  <DestTime>2025-09-29T14:28:15.7325521+02:00</DestTime>
+  <SourceFile>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/fonts/MP16REG.spritefont</SourceFile>
+  <SourceTime>2025-10-09T10:39:36.5485953+02:00</SourceTime>
+  <DestFile>c:/Users/ladyslas.cruypenynck/Documents/MonoGames/SampleGame/Content/bin/DesktopGL/Content/fonts/MP16REG.xnb</DestFile>
+  <DestTime>2025-10-09T10:42:55.8939124+02:00</DestTime>
   <Importer>FontDescriptionImporter</Importer>
   <ImporterTime>2025-06-02T12:31:02+02:00</ImporterTime>
   <Processor>FontDescriptionProcessor</Processor>

@@ -30,7 +30,6 @@ public class GameScene : Scene
         public const int PLAYER   = 1 << 2; // 4
         public const int ZOMBIE   = 1 << 3; // 8
         public const int BULLET   = 1 << 4; // 16
-        public const int EXPLOSION = 1 << 5; // 32 (new flag)
     }
 
     // Reference to the player.
@@ -42,17 +41,24 @@ public class GameScene : Scene
     // flipping/effects on one NPC to affect all others. Instead keep a
     // reference to the atlas and create a fresh AnimatedSprite per instance.
 
-    // Reference to the bullets.
+    /// <summary>
+    /// Reference to the bullets.
+    /// </summary>
     private List<Bullet> _bullets = new List<Bullet>();
 
-    // The texture atlas to create per-entity AnimatedSprite instances from.
+    /// <summary>
+    /// The texture atlas to create per-entity AnimatedSprite instances from.
+    /// </summary>
     private TextureAtlas _atlas;
 
-    // Defines the tilemap to draw.
+    /// <summary>
+    /// Defines the tilemap to draw.
+    /// </summary>
     private Level _level_01;
 
-    private GameSceneUI _ui;
-
+    /// <summary>
+    /// The current state of the game (playing, paused, game over).
+    /// </summary>
     private GameState _state;
 
     /// <summary>
@@ -69,6 +75,16 @@ public class GameScene : Scene
     /// Countdown timer for the next enemy spawn.
     /// </summary>
     private int _countdownTillNextSpawn;
+
+    /// <summary>
+    /// Player's score.
+    /// </summary>
+    private int _score = 0;
+
+    /// <summary>
+    /// The user interface for the game scene.
+    /// </summary>
+    private GameSceneUI _ui;
 
     public override void Initialize()
     {
@@ -114,22 +130,10 @@ public class GameScene : Scene
 
         _player.Initialize(playerPos, _level_01._levelGrid);
 
-        foreach (var zombie in _zombies)
-        {
-            Point zombiePos = FindStartingPositionForZombies(_level_01._levelGrid);
-            if (zombiePos != new Point(-1, -1))
-                zombie.Initialize(zombiePos, _level_01._levelGrid);
-        }
-
-        foreach (var bullet in _bullets)
-        {
-            Point bulletPos = FindStartingPositionForBullets(_level_01._levelGrid);
-            if (bulletPos != new Point(-1, -1))
-                bullet.Initialize(bulletPos, _level_01._levelGrid);
-        }
-
         _countdownTillNextEnemyMove = Game1.MoveDelay;
         _countdownTillNextSpawn = Game1.SpawnDelay;
+        _score = 0;
+        _ui.UpdateScoreText(_score);
 
         _state = GameState.Playing;
     }
@@ -201,10 +205,6 @@ public class GameScene : Scene
         AnimatedSprite playerAnimation = _atlas.CreateAnimatedSprite("player-animation-idle");
         playerAnimation.Scale = new Vector2(5.0f, 5.0f);
 
-        // Note: We intentionally don't create shared zombie/bullet sprites here.
-        // Each NPC will get its own AnimatedSprite instance when spawned so
-        // flipping/effects are independent per entity.
-
         // Create the player.
         _player = new ObjectPlayer(playerAnimation);
     }
@@ -258,6 +258,8 @@ public class GameScene : Scene
                         _level_01._levelGrid[_zombies[0]._gridPosition.X,
                                             _zombies[0]._gridPosition.Y] &= ~CellType.ZOMBIE;
                         _zombies.RemoveAt(0);
+                        _score += 100; // Increase score for hitting a zombie
+                        _ui.UpdateScoreText(_score);
                     }
                 }
             }
