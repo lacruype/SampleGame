@@ -11,6 +11,10 @@
         <Region name="bullet-01" x="144" y="48" width="16" height="16" />
         <Region name="bullet-02" x="160" y="48" width="16" height="16" />
         <Region name="bullet-03" x="176" y="48" width="16" height="16" />
+        <Region name="panel-background" x="192" y="16" width="15" height="15" />
+        <Region name="unfocused-button" x="144" y="96" width="65" height="14" />
+        <Region name="focused-button-1" x="144" y="109" width="65" height="14" />
+        <Region name="focused-button-2" x="144" y="124" width="65" height="14" />
     </Regions>
     <Animations>
         <Animation name="player-animation-idle" delay="200">
@@ -30,6 +34,10 @@
             <Frame region="bullet-02" />
             <Frame region="bullet-03" />
             <Frame region="bullet-02" />
+        </Animation>
+        <Animation name="focused-button-animation" delay="300">
+            <Frame region="focused-button-1" />
+            <Frame region="focused-button-2" />
         </Animation>
     </Animations>
 </TextureAtlas>

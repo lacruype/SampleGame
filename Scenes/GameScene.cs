@@ -150,7 +150,8 @@ public class GameScene : Scene
         {
             for (int y = 1; y < height - 1; y++)
             {
-                if (levelGrid[x, y] == CellType.WALKABLE)
+                // If the tile is walkable and at least 3 tiles away from the player, add it to the list
+                if (levelGrid[x, y] == CellType.WALKABLE && IsFarEnoughFromPlayer(new Point(x, y), 3))
                     walkableTiles.Add(new Point(x, y));
             }
         }
@@ -167,6 +168,13 @@ public class GameScene : Scene
         return walkableTiles[index];
     }
 
+    private bool IsFarEnoughFromPlayer(Point tile, int minDistance)
+    {
+        int distanceX = Math.Abs(tile.X - _player._gridPosition.X);
+        int distanceY = Math.Abs(tile.Y - _player._gridPosition.Y);
+        return (distanceX >= minDistance || distanceY >= minDistance);
+    }
+
     private Point FindStartingPositionForBullets(int[,] levelGrid)
     {
         Random random = new Random();
@@ -179,7 +187,7 @@ public class GameScene : Scene
         {
             for (int y = 1; y < height - 1; y++)
             {
-                if (levelGrid[x, y] == CellType.WALKABLE)
+                if (levelGrid[x, y] == CellType.WALKABLE && IsFarEnoughFromPlayer(new Point(x, y), 1))
                     walkableTiles.Add(new Point(x, y));
             }
         }
@@ -378,7 +386,7 @@ public class GameScene : Scene
         var bulletSprite = _atlas.CreateAnimatedSprite("bullet-animation-idle");
         bulletSprite.Scale = new Vector2(5.0f, 5.0f);
         var newBullet = new Bullet(bulletSprite);
-        Point bulletStartPos = FindStartingPositionForZombies(_level_01._levelGrid);
+        Point bulletStartPos = FindStartingPositionForBullets(_level_01._levelGrid);
         if (bulletStartPos != new Point(-1, -1))
             newBullet.Initialize(bulletStartPos, _level_01._levelGrid);
 
@@ -389,7 +397,7 @@ public class GameScene : Scene
     private void GameOver()
     {
         // Show the game over panel.
-        // _ui.ShowGameOverPanel();
+        _ui.ShowGameOverPanel();
 
         // Set the game state to game over.
         _state = GameState.GameOver;
