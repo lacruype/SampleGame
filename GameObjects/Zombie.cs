@@ -7,7 +7,7 @@ using SampleGame.Scenes;
 
 namespace SampleGame.GameObjects;
 
-public class Zombie
+public class Zombie : IDisposable
 {
     /* ================================== ATTRIBUTES ================================== */
     /// <summary>
@@ -28,16 +28,55 @@ public class Zombie
         _gridPosition.Y * Game1.TileSize
     );
 
+    /// <summary>
+    /// The player instance, used to check for collisions. Only needed because the zombie moves
+    /// </summary>
+    private ObjectPlayer _player;
+
+    /// <summary>
+    /// The level grid the Zombie is navigating.
+    /// </summary>
+    private int[,] _levelGrid;
+
+    /// <summary>
+    /// The movement span of the zombie, defining how many tiles it can move at once.
+    /// </summary>
+    public int _moveSpan { get; set; } = 2;
+
+    /// <summary>
+    /// The countdown timer to control how often the zombie moves.
+    /// </summary>
+    public int moveCountdown { get; set; } = 2;
+
+    /// <summary>
+    /// The countdown timer to control how often the zombie resets its move countdown.
+    /// </summary>
+    public int _resetMoveCountdown { get; set; } = 2;
+
     /* ================================== EVENTS ================================== */
+    /// <summary>
+    /// Event invoked when the Zombie collides with the player.
+    /// </summary>
+    public event EventHandler ZombieHasCollidedWithPlayer;
 
     /* ================================== CONSTRUCTOR ================================= */
     /// <summary>
     /// Creates a new ObjectNPC using the specified animated sprite and sound effect.
     /// </summary>
     /// <param name="sprite">The AnimatedSprite ot use when drawing the bat.</param>
-    public Zombie(AnimatedSprite sprite)
+    public Zombie(AnimatedSprite sprite, ObjectPlayer player, int[,] levelGrid)
     {
         _sprite = sprite;
+        _player = player;
+        _levelGrid = levelGrid;
+
+        _player.PlayerMoved += OnPlayerMoved;
+    }
+
+    public virtual void Dispose()
+    {
+        _levelGrid[_gridPosition.X, _gridPosition.Y] &= ~GameScene.CellType.ZOMBIE;
+        _player.PlayerMoved -= OnPlayerMoved;
     }
 
     /* ================================== METHODS ================================== */
@@ -50,16 +89,35 @@ public class Zombie
         MoveTo(startingPosition, levelGrid);
     }
 
+    private void OnPlayerMoved(object sender, EventArgs e)
+    {
+        --moveCountdown;
+        if (moveCountdown > 0)
+            return;
+        moveCountdown = _resetMoveCountdown; // Reset countdown
+
+        Pathfinder pathfinder = new(_levelGrid);
+        Point nextPosition = pathfinder.GetNextPosition(_gridPosition, _player._gridPosition);
+
+        MoveTo(nextPosition, _levelGrid);
+        if (_gridPosition == _player._gridPosition)
+        {
+            // Handle collision with player
+            ZombieHasCollidedWithPlayer?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     public void MoveTo(Point newPosition, int[,] _levelGrid)
     {
         _levelGrid[_gridPosition.X, _gridPosition.Y] &= ~GameScene.CellType.ZOMBIE;
         if (_gridPosition.X < newPosition.X)
-            _sprite.Effects = SpriteEffects.FlipHorizontally;
+            _sprite.Effects = SpriteEffects.FlipHorizontally; // Facing right
         else if (_gridPosition.X > newPosition.X)
             _sprite.Effects = SpriteEffects.None; // Facing left
         _gridPosition = newPosition;
         _levelGrid[_gridPosition.X, _gridPosition.Y] |= GameScene.CellType.ZOMBIE;
     }
+
 
     /// <summary>
     /// Updates the bat.

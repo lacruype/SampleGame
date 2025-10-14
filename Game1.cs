@@ -16,11 +16,6 @@ public class Game1 : Core
     public const int TileSize = 80;
 
     /// <summary>
-    /// The delay between enemy movements.
-    /// </summary>
-    public const int MoveDelay = 2;
-
-    /// <summary>
     /// The delay between enemy spawning.
     /// </summary>
     public const int SpawnDelay = 5;

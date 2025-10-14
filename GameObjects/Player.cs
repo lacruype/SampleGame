@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary;
 using MonoGameLibrary.Graphics;
 using SampleGame.Scenes;
@@ -29,6 +30,8 @@ public class ObjectPlayer
 
     /* ================================== EVENTS ================================== */
 
+    public event EventHandler PlayerMoved;
+
     /* ================================== CONSTRUCTORS ================================== */
     /// <summary>
     /// Creates a new ObjectPlayer using the specified animated sprite.
@@ -37,6 +40,11 @@ public class ObjectPlayer
     public ObjectPlayer(AnimatedSprite sprite)
     {
         _sprite = sprite;
+    }
+
+    public virtual void Dispose()
+    {
+        PlayerMoved = null;
     }
 
     /* ================================== METHODS ================================== */
@@ -71,10 +79,40 @@ public class ObjectPlayer
         _sprite.Draw(Core.SpriteBatch, _screenPosition);
     }
 
+    public void HandleInput(int[,] _levelGrid)
+    {
+        // Move the player based on input
+        Point newPosition = _gridPosition;
+
+         if (GameController.MoveLeft())
+        {
+            _sprite.Effects = SpriteEffects.FlipHorizontally;
+            newPosition -= new Point(1, 0);
+        }
+        else if (GameController.MoveRight())
+        {
+            _sprite.Effects = SpriteEffects.None;
+            newPosition += new Point(1, 0);
+        }
+        else if (GameController.MoveUp())
+            newPosition -= new Point(0, 1);
+        else if (GameController.MoveDown())
+            newPosition += new Point(0, 1);
+
+        MoveTo(newPosition, _levelGrid);
+    }
+
     public void MoveTo(Point newPosition, int[,] _levelGrid)
     {
+
+        if (newPosition == _gridPosition || 
+        (_levelGrid[newPosition.X, newPosition.Y] & GameScene.CellType.WALL) != 0)
+            return;
+
         _levelGrid[_gridPosition.X, _gridPosition.Y] &= ~GameScene.CellType.PLAYER;
         _gridPosition = newPosition;
         _levelGrid[_gridPosition.X, _gridPosition.Y] |= GameScene.CellType.PLAYER;
+
+        PlayerMoved?.Invoke(this, EventArgs.Empty);
     }
 }
