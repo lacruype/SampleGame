@@ -23,13 +23,20 @@ public class GameScene : Scene
         GameOver
     }
 
+    private enum EnemyType
+    {
+        Zombie,
+        BigZombie,
+        FastZombie
+    }
+
     public static class CellType
     {
         public const int WALKABLE = 1 << 0; // 1
-        public const int WALL     = 1 << 1; // 2
-        public const int PLAYER   = 1 << 2; // 4
-        public const int ZOMBIE   = 1 << 3; // 8
-        public const int BULLET   = 1 << 4; // 16
+        public const int WALL = 1 << 1; // 2
+        public const int PLAYER = 1 << 2; // 4
+        public const int ZOMBIE = 1 << 3; // 8
+        public const int BULLET = 1 << 4; // 16
     }
 
     // Reference to the player.
@@ -324,15 +331,32 @@ public class GameScene : Scene
 
     private void OnTimeToAddNewNPC()
     {
-        // Spawn a new NPC (zombie) with its own AnimatedSprite instance
-        var zombieSprite = _atlas.CreateAnimatedSprite("zombie-animation-idle");
-        zombieSprite.Scale = new Vector2(5.0f, 5.0f);
-        var newZombie = new Zombie(zombieSprite, _player, _currentLevel._levelGrid);
-        Point zombieStartPos = FindStartingPositionForZombies(_currentLevel._levelGrid);
-        if (zombieStartPos != new Point(-1, -1))
-            newZombie.Initialize(zombieStartPos, _currentLevel._levelGrid);
+        // Randomize through enemy types to choose zombie type to spawn
+        Random random = new Random();
+        var newZombie = null as Zombie;
 
-            // Spawn a new NPC2 (bullet) with its own AnimatedSprite instance
+        EnemyType enemyType = (EnemyType)random.Next(0, Enum.GetValues(typeof(EnemyType)).Length);
+
+        // Spawn a new BigZombie (stronger zombie) with its own AnimatedSprite instance
+        var newZombieSprite = _atlas.CreateAnimatedSprite("zombie-animation-idle");
+        switch (enemyType)
+        {
+            case EnemyType.BigZombie:
+                newZombie = new BigZombie(newZombieSprite, _player, _currentLevel._levelGrid);
+                break;
+            case EnemyType.FastZombie:
+                newZombie = new FastZombie(newZombieSprite, _player, _currentLevel._levelGrid);
+                break;
+            
+            default:
+                newZombie = new Zombie(newZombieSprite, _player, _currentLevel._levelGrid);
+                break;
+        }
+        Point newZombieStartPos = FindStartingPositionForZombies(_currentLevel._levelGrid);
+        if (newZombieStartPos != new Point(-1, -1))
+            newZombie.Initialize(newZombieStartPos, _currentLevel._levelGrid);
+
+        // Spawn a new NPC2 (bullet) with its own AnimatedSprite instance
         var bulletSprite = _atlas.CreateAnimatedSprite("bullet-animation-idle");
         bulletSprite.Scale = new Vector2(5.0f, 5.0f);
         var newBullet = new Bullet(bulletSprite);

@@ -41,7 +41,7 @@ public class Zombie : IDisposable
     /// <summary>
     /// The movement span of the zombie, defining how many tiles it can move at once.
     /// </summary>
-    public int _moveSpan { get; set; } = 2;
+    public int _moveSpan { get; set; } = 1;
 
     /// <summary>
     /// The countdown timer to control how often the zombie moves.
@@ -70,6 +70,8 @@ public class Zombie : IDisposable
         _player = player;
         _levelGrid = levelGrid;
 
+        _sprite.Scale = new Vector2(5.0f, 5.0f);
+
         _player.PlayerMoved += OnPlayerMoved;
     }
 
@@ -96,14 +98,18 @@ public class Zombie : IDisposable
             return;
         moveCountdown = _resetMoveCountdown; // Reset countdown
 
-        Pathfinder pathfinder = new(_levelGrid);
-        Point nextPosition = pathfinder.GetNextPosition(_gridPosition, _player._gridPosition);
-
-        MoveTo(nextPosition, _levelGrid);
-        if (_gridPosition == _player._gridPosition)
+        for (int i = 0; i < _moveSpan; i++)
         {
-            // Handle collision with player
-            ZombieHasCollidedWithPlayer?.Invoke(this, EventArgs.Empty);
+            Pathfinder pathfinder = new(_levelGrid);
+            Point nextPosition = pathfinder.GetNextPosition(_gridPosition, _player._gridPosition);
+
+            MoveTo(nextPosition, _levelGrid);
+            if (_gridPosition == _player._gridPosition)
+            {
+                // Handle collision with player
+                ZombieHasCollidedWithPlayer?.Invoke(this, EventArgs.Empty);
+                break;
+            }
         }
     }
 
