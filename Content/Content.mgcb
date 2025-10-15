@@ -86,3 +86,6 @@
 #begin levels/level-01.json
 /copy:levels/level-01.json
 
+#begin settings/spawn_config.json
+/copy:settings/spawn_config.json
+

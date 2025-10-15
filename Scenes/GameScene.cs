@@ -69,6 +69,16 @@ public class GameScene : Scene
     private GameState _state;
 
     /// <summary>
+    /// The spawn configuration loaded from JSON.
+    /// </summary>
+    private SpawnConfig _spawnConfig = SpawnConfigLoader.Load("Content/settings/spawn_config.json");
+
+    /// <summary>
+    /// The current turn number in the game.
+    /// </summary>
+    private int _currentTurn = 0;
+
+    /// <summary>
     /// Countdown timer for the next enemy spawn.
     /// </summary>
     private int _countdownTillNextSpawn;
@@ -115,6 +125,8 @@ public class GameScene : Scene
 
     private void InitializeNewGame()
     {
+        Random rng = new Random();
+
         _player.Dispose();
         // Dispose of existing zombies and bullets
         foreach (var z in _zombies)
@@ -136,6 +148,20 @@ public class GameScene : Scene
         _countdownTillNextSpawn = Game1.SpawnDelay;
         _score = 0;
         _ui.UpdateScoreText(_score);
+
+        foreach (var cat in _spawnConfig.Categories)
+            cat.ResetSpawnTimer(rng);
+
+        // Schedule the first spawn for each rule
+        foreach (var cat in _spawnConfig.Categories)
+        {
+            foreach (var rule in cat.Rules)
+            {
+                rule.ScheduleNextSpawn(0, rng);
+            }
+        }
+
+        _currentTurn = 0;
 
         _state = GameState.Playing;
     }
@@ -255,6 +281,21 @@ public class GameScene : Scene
                     }
                 }
             }
+        }
+
+        _currentTurn++;
+        foreach (var cat in _spawnConfig.Categories)
+        {
+            if (!cat.CanSpawn(_currentTurn))
+                continue;
+
+            var rule = cat.PickWeighted(new Random());
+            if (rule == null)
+                continue;
+
+            Console.WriteLine($"Spawning {rule.EntityType} from category {cat.Name} at turn {_currentTurn}");
+
+            cat.ScheduleNextSpawn(_currentTurn, rule, new Random());
         }
 
         --_countdownTillNextSpawn;
