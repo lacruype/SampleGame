@@ -3,7 +3,7 @@
     {
       "Name": "Zombies",
       "Rules": [
-        { "EntityType": "NormalZombie", "MinTurns": 4, "MaxTurns": 6, "Weight": 0.6 },
+        { "EntityType": "Zombie", "MinTurns": 4, "MaxTurns": 6, "Weight": 0.6 },
         { "EntityType": "BigZombie", "MinTurns": 5, "MaxTurns": 7, "Weight": 0.3 },
         { "EntityType": "FastZombie", "MinTurns": 6, "MaxTurns": 8, "Weight": 0.1 }
       ]
@@ -11,8 +11,7 @@
     {
       "Name": "Items",
       "Rules": [
-        { "EntityType": "Bullet", "MinTurns": 5, "MaxTurns": 5, "Weight": 1.0 },
-        { "EntityType": "Molotov", "MinTurns": 2, "MaxTurns": 4, "Weight": 1.0 }
+        { "EntityType": "Bullet", "MinTurns": 5, "MaxTurns": 5, "Weight": 1.0 }
       ]
     }
   ]

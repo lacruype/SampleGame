@@ -11,6 +11,7 @@ using MonoGameLibrary.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 
 namespace SampleGame.Scenes;
 
@@ -79,11 +80,6 @@ public class GameScene : Scene
     private int _currentTurn = 0;
 
     /// <summary>
-    /// Countdown timer for the next enemy spawn.
-    /// </summary>
-    private int _countdownTillNextSpawn;
-
-    /// <summary>
     /// Player's score.
     /// </summary>
     private int _score = 0;
@@ -137,15 +133,12 @@ public class GameScene : Scene
         // Define the level layout based on the tilemap
         _currentLevel.InitializeGrid(_currentLevel.Layers[0].Columns, _currentLevel.Layers[0].Rows);
 
-        OnTimeToAddNewNPC();
-
         Point playerPos = new Point(_currentLevel.Layers[0].Columns / 2, _currentLevel.Layers[0].Rows / 2);
 
         _player.Initialize(playerPos, _currentLevel._levelGrid);
 
         _player.PlayerMoved += OnPlayerHasMoved;
 
-        _countdownTillNextSpawn = Game1.SpawnDelay;
         _score = 0;
         _ui.UpdateScoreText(_score);
 
@@ -293,16 +286,10 @@ public class GameScene : Scene
             if (rule == null)
                 continue;
 
+            Spawn(rule, cat, _currentTurn);
             Console.WriteLine($"Spawning {rule.EntityType} from category {cat.Name} at turn {_currentTurn}");
 
             cat.ScheduleNextSpawn(_currentTurn, rule, new Random());
-        }
-
-        --_countdownTillNextSpawn;
-        if (_countdownTillNextSpawn <= 0)
-        {
-            OnTimeToAddNewNPC();
-            _countdownTillNextSpawn = Game1.SpawnDelay;
         }
     }
 
@@ -370,45 +357,63 @@ public class GameScene : Scene
         GameOver();
     }
 
-    private void OnTimeToAddNewNPC()
+    private void Spawn(SpawnRule rule, SpawnCategory category, int currentTurn)
     {
-        // Randomize through enemy types to choose zombie type to spawn
-        Random random = new Random();
-        var newZombie = null as Zombie;
-
-        EnemyType enemyType = (EnemyType)random.Next(0, Enum.GetValues(typeof(EnemyType)).Length);
-
-        // Spawn a new BigZombie (stronger zombie) with its own AnimatedSprite instance
-        var newZombieSprite = _atlas.CreateAnimatedSprite("zombie-animation-idle");
-        switch (enemyType)
+        if (category.Name == "Zombies")
         {
-            case EnemyType.BigZombie:
-                newZombie = new BigZombie(newZombieSprite, _player, _currentLevel._levelGrid);
-                break;
-            case EnemyType.FastZombie:
-                newZombie = new FastZombie(newZombieSprite, _player, _currentLevel._levelGrid);
-                break;
-            
-            default:
-                newZombie = new Zombie(newZombieSprite, _player, _currentLevel._levelGrid);
-                break;
+            if (Enum.TryParse<EnemyType>(rule.EntityType, out EnemyType enemyType))
+            {
+                var newZombie = null as Zombie;
+
+                // Spawn a Zombie. This line will be modified when we add more zombie sprites
+                var newZombieSprite = _atlas.CreateAnimatedSprite("zombie-animation-idle");
+
+                switch (enemyType)
+                {
+                    case EnemyType.BigZombie:
+                        newZombie = new BigZombie(newZombieSprite, _player, _currentLevel._levelGrid);
+                        break;
+                    case EnemyType.FastZombie:
+                        newZombie = new FastZombie(newZombieSprite, _player, _currentLevel._levelGrid);
+                        break;
+
+                    default:
+                        newZombie = new Zombie(newZombieSprite, _player, _currentLevel._levelGrid);
+                        break;
+                }
+
+                // Place the new zombie at a valid starting position
+                Point newZombieStartPos = FindStartingPositionForZombies(_currentLevel._levelGrid);
+                if (newZombieStartPos != new Point(-1, -1))
+                    newZombie.Initialize(newZombieStartPos, _currentLevel._levelGrid);
+
+                _zombies.Add(newZombie);
+                newZombie.ZombieHasCollidedWithPlayer += OnPlayerZombieCollision;
+            }
+            else
+            {
+                Console.WriteLine($"Unknown entity type '{rule.EntityType}' in spawn rule for Zombies.");
+            }
         }
-        Point newZombieStartPos = FindStartingPositionForZombies(_currentLevel._levelGrid);
-        if (newZombieStartPos != new Point(-1, -1))
-            newZombie.Initialize(newZombieStartPos, _currentLevel._levelGrid);
+        else if (category.Name == "Items")
+        {
+            if (rule.EntityType == "Bullet")
+            {
+                // Spawn a new NPC2 (bullet) with its own AnimatedSprite instance
+                var bulletSprite = _atlas.CreateAnimatedSprite("bullet-animation-idle");
+                bulletSprite.Scale = new Vector2(5.0f, 5.0f);
+                var newBullet = new Bullet(bulletSprite);
+                Point bulletStartPos = FindStartingPositionForBullets(_currentLevel._levelGrid);
+                if (bulletStartPos != new Point(-1, -1))
+                    newBullet.Initialize(bulletStartPos, _currentLevel._levelGrid);
 
-        // Spawn a new NPC2 (bullet) with its own AnimatedSprite instance
-        var bulletSprite = _atlas.CreateAnimatedSprite("bullet-animation-idle");
-        bulletSprite.Scale = new Vector2(5.0f, 5.0f);
-        var newBullet = new Bullet(bulletSprite);
-        Point bulletStartPos = FindStartingPositionForBullets(_currentLevel._levelGrid);
-        if (bulletStartPos != new Point(-1, -1))
-            newBullet.Initialize(bulletStartPos, _currentLevel._levelGrid);
-
-        _zombies.Add(newZombie);
-        _bullets.Add(newBullet);
-
-        newZombie.ZombieHasCollidedWithPlayer += OnPlayerZombieCollision;
+                _bullets.Add(newBullet);
+            }
+            else
+            {
+                Console.WriteLine($"Unknown entity type '{rule.EntityType}' in spawn rule for Items.");
+            }
+        }
     }
 
     private void GameOver()
